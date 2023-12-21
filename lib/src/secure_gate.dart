@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:secure_gate/src/listeners/listener.dart';
 
 import 'secure_gate_controller.dart';
 
@@ -49,11 +50,14 @@ class SecureGate extends StatefulWidget {
 }
 
 class _SecureGateState extends State<SecureGate>
-    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late AnimationController _gateVisibility;
   late StreamSubscription<bool> _sub;
   late SecureGateController _controller;
   late Color _color;
+
+  final _secureGateListener = SecureGateListener();
+  late StreamSubscription _secureGateSub;
 
   @override
   void initState() {
@@ -61,7 +65,13 @@ class _SecureGateState extends State<SecureGate>
     _controller = widget.controller ?? SecureGateController.instance;
     _controller.lock();
 
-    WidgetsBinding.instance.addObserver(this);
+    _secureGateListener.init();
+    _secureGateSub = _secureGateListener.stream.listen((event) {
+      setState(() {
+        _controller.lock();
+      });
+    });
+
     _gateVisibility =
         AnimationController(vsync: this, duration: kThemeAnimationDuration * 2)
           ..addListener(() {
@@ -77,16 +87,9 @@ class _SecureGateState extends State<SecureGate>
   void dispose() {
     _sub.cancel();
     _gateVisibility.dispose();
-    WidgetsBinding.instance.removeObserver(this);
+    _secureGateSub.cancel();
+    _secureGateListener.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() {
-      _controller.lock();
-    });
-    super.didChangeAppLifecycleState(state);
   }
 
   void _callback(bool lock) {
