@@ -1,0 +1,17 @@
+name: secure_gate
+description: "A simple package that helps you secure your app in multiple platforms."
+version: 0.0.1
+homepage: https://github.com/lamnhan066/secure_gate
+
+environment:
+  sdk: ">=3.2.3 <4.0.0"
+  flutter: ">=3.3.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
