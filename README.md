@@ -1,49 +1,87 @@
 # Secure Gate
 
-A simple package that helps you secure your app in multiple platforms.
+A simple package that helps you secure your app when it is hidden or inactive by covered with a blur screen and overlays Widget.
 
-## Usage
+## Setup
 
-With `MaterialApp`:
+Wrap your page with `SecureGate`. All pages with the same `controller` will be shared the same behavior. It means that when one page is unlocked, all pages with the same `controller` will be unlocked:
 
 ```dart
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Page extends StatelessWidget {
+  const Page({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: SecureGate(
+    return SecureGate(
         overlays: (context, controller) {
+        
+          // Do your some other methods like biometric authentication,.. here.
+          // 
+          // You can `return SizedBox.shrink();` if you don't want to overlays any Widget.
+
           return Center(
             child: ElevatedButton(
               onPressed: () {
                 controller.unlock();
               },
-              child: const Text('Go'),
+              child: const Text('Main Secure Gate'),
             ),
           );
-        },
-        child: const MyHomePage(title: 'Flutter Demo Home Page'),
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Page'),
+        ),
+        body: const Center(
+          child: Text('This is a secured page'),
+        ),
       ),
     );
   }
 }
 ```
 
-With `MaterialApp.router`:
+Use with `MaterialApp`, this method will secure all pages:
 
 ```dart
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      builder: (context, child) {
+        return SecureGate(
+          overlays: (context, controller) {
+            
+            // Do your some other methods like biometric authentication,.. here.
+            // 
+            // You can `return SizedBox.shrink();` if you don't want to overlays any Widget.
+            
+            return Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  controller.unlock();
+                },
+                child: const Text('Main Secure Gate'),
+              ),
+            );
+          },
+          child: child!,
+        );
+      },
+    );
+  }
+}
+```
+
+Use with `MaterialApp.router`, this method will secure all pages:
+
+```dart
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
@@ -53,18 +91,23 @@ class MyApp extends StatelessWidget {
         themeMode: ThemeMode.light,
         builder: (BuildContext context, Widget? child) {
         return SecureGate(
-                overlays: (context, controller) {
-                    return Center(
-                        child: ElevatedButton(
-                            onPressed: () {
-                                controller.unlock();
-                            },
-                            child: const Text('Go'),
-                        ),
-                    );
-                },
-                child: child!
-            );
+            overlays: (context, controller) {
+
+                // Do your some other methods like biometric authentication,.. here.
+                // 
+                // You can `return SizedBox.shrink();` if you don't want to overlays any Widget.
+
+                return Center(
+                    child: ElevatedButton(
+                        onPressed: () {
+                            controller.unlock();
+                        },
+                        child: const Text('Go'),
+                    ),
+                );
+            },
+            child: child!
+          );
         },
     );
   }
@@ -73,8 +116,84 @@ class MyApp extends StatelessWidget {
 
 The package uses a build-in singleton controller `SecureGateController.instance`, so if you want to separate the behavior into multiple places, you need to create a new controller by defining a new `SecureGateController()` and put it into the `controller` parameter.
 
-You can also specify the `color`, `blur` and `opacity` value by modify its' parameters.
+Remember to `dispose()` the created controller when it's not in use. You can also dipose the build-in controller by calling `SecureGateController.instance.close()`, the package will automatically create a new one when it's needed to use.
+
+You can also specify the `color`, `blur` and `opacity` value by modify its' parameters in the `SecureGate`.
+
+## Usage
+
+- Call `controller.lock()` if you want to lock all pages that using the same `controller` by your self.
+
+- Call `controller.unlock()` if you want to unlock any pages that using the same `controller`.
+
+- Call `controller.on()` if you want to turn on the `controller`. This method will also `lock()` the screen by default, you can set the `isLock` to `false` to disable this behavior.
+
+- Call `controller.off()` if you want to turn off the `controller`. You can not use `lock()` and `unlock()` when the controller is turned off, so remember to `lock()` or `unlock()` before using this method. This method will also `unlock()` the screen by default, you can set the `isUnlock` to `false` to disable this behavior.
+
+## Advanced
+
+By default, the `SecureGate` uses a build-in controller named `SecureGateController.instance`. You can modify it to apply to all pages that wrapped with the `SecureGate`:
+
+```dart
+SecureGateController.instance.overlays = (context, controller) {
+
+    // Do your some other methods like biometric authentication,.. here.
+    // 
+    // You can `return SizedBox.shrink();` if you don't want to overlays any Widget.
+
+    return Center(
+      child: ElevatedButton(
+        onPressed: () {
+          controller.unlock();
+        },
+        child: const Text('Go'),
+      ),
+    );
+  };
+```
+
+Or you can create a global overlays by setting the `overlays` parameter in the new controller and pass it into the `SecureGate`:
+
+```dart
+final secureGateController = SecureGateController(
+  overlays: (context, controller) {
+    // Do your some other methods like biometric authentication,.. here.
+    // 
+    // You can `return SizedBox.shrink();` if you don't want to overlays any Widget.
+
+    return Center(
+      child: ElevatedButton(
+        onPressed: () {
+          controller.unlock();
+        },
+        child: const Text('Go'),
+      ),
+    );
+  },
+);
+
+class Page extends StatelessWidget {
+  const Page({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SecureGate(
+      controller: secureGateController,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Page'),
+        ),
+        body: const Center(
+          child: Text('This is a secured page'),
+        ),
+      ),
+    );
+  }
+}
+```
+
+By default, the screen will be locked on start. If you want to change this behavior, you can set the `lockOnStart` in the `controller` to `false`, so the page will be unlocked on start.
 
 ## Information
 
-This package does not use any native way to secure the screen. So it may not works as expected in some cases. If you have any suggestion, feel free to open an issue or a PR. Thank you.
+This package does not use any native way to secure the screen. So it may not works as expected in some cases. If you have any issue or suggestion, feel free to file an issue or a PR. Thank you.
