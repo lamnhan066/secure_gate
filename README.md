@@ -1,6 +1,6 @@
 # Secure Gate
 
-A simple package that helps you secure your app when it is hidden or inactive by covered with a blur screen and overlays Widget.
+A simple package that helps you secure your app when it is hidden or inactive by covered with a blur screen and overlay Widget.
 
 ## Setup
 
@@ -18,7 +18,7 @@ class Page extends StatelessWidget {
             controller.unlock();
           }
         }
-        overlays: (context, controller) {
+        overlayBuilder: (context, controller) {
           return Center(
             child: ElevatedButton(
               onPressed: () {
@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
               controller.unlock();
             }
           }
-          overlays: (context, controller) {
+          overlayBuilder: (context, controller) {
             return Center(
               child: ElevatedButton(
                 onPressed: () {
@@ -96,7 +96,7 @@ class MyApp extends StatelessWidget {
                 controller.unlock();
               }
             }
-            overlays: (context, controller) {
+            overlayBuilder: (context, controller) {
                 return Center(
                     child: ElevatedButton(
                         onPressed: () {
@@ -135,7 +135,7 @@ You can also specify the `color`, `blur` and `opacity` value by modify its' para
 By default, the `SecureGate` uses a build-in controller named `SecureGateController.instance`. You can modify it to apply to all pages that wrapped with the `SecureGate`:
 
 ```dart
-SecureGateController.instance.overlays = (context, controller) {
+SecureGateController.instance.overlayBuilder = (context, controller) {
     return Center(
       child: ElevatedButton(
         onPressed: () {
@@ -153,7 +153,7 @@ SecureGateController.instance.onFocus = (controller) async {
     };
 ```
 
-Or you can create a global overlays by setting the `overlays` parameter in the new controller and pass it into the `SecureGate`:
+Or you can create a global overlayBuilder by setting the `overlayBuilder` parameter in the new controller and pass it into the `SecureGate`:
 
 ```dart
 final secureGateController = SecureGateController(
@@ -162,7 +162,7 @@ final secureGateController = SecureGateController(
       controller.unlock();
     }
   }
-  overlays: (context, controller) {
+  overlayBuilder: (context, controller) {
     return Center(
       child: ElevatedButton(
         onPressed: () {

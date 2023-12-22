@@ -1,3 +1,8 @@
+## 0.1.0
+
+* Change from `overlays` to `overlayBuilder`.
+* Update needed files.
+
 ## 0.0.3
 
 * Add `onFocus` parameter to `SecureGate` and `SecureGateController` to control the focus event, so you can implement something like biometric authentication.
