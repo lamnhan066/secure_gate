@@ -1,0 +1,1 @@
+enum SecureGateListenerState { blur, focus }

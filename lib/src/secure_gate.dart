@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:secure_gate/src/listeners/listener.dart';
+import 'package:secure_gate/src/listeners/listener_state.dart';
 
 import 'secure_gate_controller.dart';
 
@@ -18,6 +19,7 @@ class SecureGate extends StatefulWidget {
     super.key,
     this.controller,
     required this.child,
+    this.onFocus,
     this.overlays,
     this.color,
     this.blur = 15,
@@ -33,11 +35,17 @@ class SecureGate extends StatefulWidget {
   final Widget child;
 
   /// Put an overlay widget. You can use the [controller] to `lock` or `unlock`
-  /// the screen. You can set the global `overlays` in SecureGateController so
+  /// the screen. You can set the global `overlays` in `SecureGateController` so
   /// it can be used across pages. If you set the `overlays` parameter in both
   /// [SecureGateController] and [SecureGate], the [SecureGate] one will be used.
   final Widget Function(BuildContext context, SecureGateController controller)?
       overlays;
+
+  /// This is a callback that will be called when the device is focused. You can
+  /// use something like biometric authentication here. You can set the global `onFocus`
+  /// in `SecureGateController` so it can be used across pages. If you set the `overlays` parameter
+  /// in both [SecureGateController] and [SecureGate], the [SecureGate] one will be used.
+  final FutureOr<void> Function(SecureGateController controller)? onFocus;
 
   /// Blur of the blur screen.
   final double blur;
@@ -58,20 +66,37 @@ class _SecureGateState extends State<SecureGate>
   late StreamSubscription<bool> _sub;
   late SecureGateController _controller;
   late Color _color;
+  FutureOr<void> Function(SecureGateController controller)? _onFocus;
 
   final _secureGateListener = SecureGateListener();
   late StreamSubscription _secureGateSub;
 
+  bool _needStopListenToEvent = false;
+
   @override
   void initState() {
-    _color = widget.color ?? Colors.grey.shade200;
     _controller = widget.controller ?? SecureGateController.instance;
+    _color = widget.color ?? Colors.grey.shade200;
+    _onFocus = widget.onFocus ?? _controller.onFocus;
 
     _secureGateListener.init();
-    _secureGateSub = _secureGateListener.stream.listen((event) {
-      setState(() {
-        _controller.lock();
-      });
+    _secureGateSub = _secureGateListener.stream.listen((event) async {
+      if (_needStopListenToEvent) return;
+      _needStopListenToEvent = true;
+
+      switch (event) {
+        case SecureGateListenerState.blur:
+          if (_controller.isUnlocked) {
+            setState(() {
+              _controller.lock();
+            });
+          }
+        case SecureGateListenerState.focus:
+          if (_controller.isLocked) {
+            await _onFocusCallback();
+          }
+      }
+      _needStopListenToEvent = false;
     });
 
     _gateVisibility =
@@ -80,6 +105,12 @@ class _SecureGateState extends State<SecureGate>
     _sub = _controller.stream.listen(_callback);
 
     _callback(_controller.isLocked);
+    if (_controller.isLocked && _onFocus != null) {
+      _needStopListenToEvent = true;
+      _onFocusCallback().then((value) {
+        _needStopListenToEvent = false;
+      });
+    }
     super.initState();
   }
 
@@ -90,6 +121,16 @@ class _SecureGateState extends State<SecureGate>
     _secureGateSub.cancel();
     _secureGateListener.dispose();
     super.dispose();
+  }
+
+  Future<void> _onFocusCallback() async {
+    Completer completer = Completer();
+    if (_onFocus != null) {
+      completer.complete(_onFocus!(_controller));
+    } else {
+      completer.complete();
+    }
+    await completer.future;
   }
 
   void _callback(bool lock) {

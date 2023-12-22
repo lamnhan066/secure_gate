@@ -2,11 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:secure_gate/src/listeners/listener.dart';
+import 'package:secure_gate/src/listeners/listener_state.dart';
 
 class SecureGateListenerImplement
     with WidgetsBindingObserver
     implements SecureGateListener {
-  final StreamController _controller = StreamController();
+  final _controller = StreamController<SecureGateListenerState>();
 
   SecureGateListenerImplement();
 
@@ -23,10 +24,14 @@ class SecureGateListenerImplement
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _controller.sink.add(true);
+    if (state == AppLifecycleState.resumed) {
+      _controller.sink.add(SecureGateListenerState.focus);
+    } else {
+      _controller.sink.add(SecureGateListenerState.blur);
+    }
     super.didChangeAppLifecycleState(state);
   }
 
   @override
-  Stream<void> get stream => _controller.stream;
+  Stream<SecureGateListenerState> get stream => _controller.stream;
 }

@@ -4,26 +4,33 @@ import 'dart:async';
 import 'dart:html';
 
 import 'package:secure_gate/src/listeners/listener.dart';
+import 'package:secure_gate/src/listeners/listener_state.dart';
 
 class SecureGateListenerImplement implements SecureGateListener {
-  StreamSubscription? _sub;
-  final StreamController _controller = StreamController.broadcast();
+  StreamSubscription? _subBlur;
+  StreamSubscription? _subFocus;
+  final _controller = StreamController<SecureGateListenerState>();
 
   SecureGateListenerImplement();
 
   @override
-  Stream<void> get stream => _controller.stream;
+  Stream<SecureGateListenerState> get stream => _controller.stream;
 
   @override
   void init() {
-    _sub = window.onBlur.listen((event) {
-      _controller.sink.add(true);
+    _subBlur = window.onBlur.listen((event) {
+      _controller.sink.add(SecureGateListenerState.blur);
+    });
+
+    _subFocus = window.onFocus.listen((event) {
+      _controller.sink.add(SecureGateListenerState.focus);
     });
   }
 
   @override
   void dispose() {
-    _sub?.cancel();
+    _subBlur?.cancel();
+    _subFocus?.cancel();
     _controller.close();
   }
 }

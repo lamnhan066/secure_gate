@@ -48,8 +48,17 @@ class SecureGateController {
   final StreamController<bool> _streamController = StreamController.broadcast();
   Stream<bool> get stream => _streamController.stream;
 
+  /// A global overlay widget, this is a default overlay for all `SecureGate`
+  /// that use the same `controller`. You can use the `controller` to `lock` or `unlock`
+  /// the screen.  If you set the `overlays` parameter in both [SecureGateController]
+  /// and `SecureGate`, the `SecureGate` one will be used.
   Widget Function(BuildContext context, SecureGateController controller)?
       overlays;
+
+  /// This is a global callback that will be called when the device is focused. You can
+  /// use something like biometric authentication here. If you set the `overlays` parameter
+  /// in both [SecureGateController] and `SecureGate`, the `SecureGate` one will be used.
+  final FutureOr<void> Function(SecureGateController controller)? onFocus;
 
   /// Create a new instance for the controller. The SecureGate will automatically
   /// locked when it starts if [lockOnStart] is `true`.
@@ -63,6 +72,7 @@ class SecureGateController {
   SecureGateController({
     bool lockOnStart = true,
     this.overlays,
+    this.onFocus,
   }) : _lockOnStart = lockOnStart {
     _lock = lockOnStart;
   }
