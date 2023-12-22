@@ -13,12 +13,12 @@ class Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SecureGate(
+        onFocus: (controller) async {
+          if (await biometricAuthentication()) {
+            controller.unlock();
+          }
+        }
         overlays: (context, controller) {
-        
-          // Do your some other methods like biometric authentication,.. here.
-          // 
-          // You can `return SizedBox.shrink();` if you don't want to overlays any Widget.
-
           return Center(
             child: ElevatedButton(
               onPressed: () {
@@ -53,12 +53,12 @@ class MyApp extends StatelessWidget {
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
       builder: (context, child) {
         return SecureGate(
+          onFocus: (controller) async {
+            if (await biometricAuthentication()) {
+              controller.unlock();
+            }
+          }
           overlays: (context, controller) {
-            
-            // Do your some other methods like biometric authentication,.. here.
-            // 
-            // You can `return SizedBox.shrink();` if you don't want to overlays any Widget.
-            
             return Center(
               child: ElevatedButton(
                 onPressed: () {
@@ -91,12 +91,12 @@ class MyApp extends StatelessWidget {
         themeMode: ThemeMode.light,
         builder: (BuildContext context, Widget? child) {
         return SecureGate(
+            onFocus: (controller) async {
+              if (await biometricAuthentication()) {
+                controller.unlock();
+              }
+            }
             overlays: (context, controller) {
-
-                // Do your some other methods like biometric authentication,.. here.
-                // 
-                // You can `return SizedBox.shrink();` if you don't want to overlays any Widget.
-
                 return Center(
                     child: ElevatedButton(
                         onPressed: () {
@@ -136,11 +136,6 @@ By default, the `SecureGate` uses a build-in controller named `SecureGateControl
 
 ```dart
 SecureGateController.instance.overlays = (context, controller) {
-
-    // Do your some other methods like biometric authentication,.. here.
-    // 
-    // You can `return SizedBox.shrink();` if you don't want to overlays any Widget.
-
     return Center(
       child: ElevatedButton(
         onPressed: () {
@@ -150,17 +145,24 @@ SecureGateController.instance.overlays = (context, controller) {
       ),
     );
   };
+
+SecureGateController.instance.onFocus = (controller) async {
+      if (await biometricAuthentication()) {
+        controller.unlock();
+      }
+    };
 ```
 
 Or you can create a global overlays by setting the `overlays` parameter in the new controller and pass it into the `SecureGate`:
 
 ```dart
 final secureGateController = SecureGateController(
+  onFocus: (controller) async {
+    if (await biometricAuthentication()) {
+      controller.unlock();
+    }
+  }
   overlays: (context, controller) {
-    // Do your some other methods like biometric authentication,.. here.
-    // 
-    // You can `return SizedBox.shrink();` if you don't want to overlays any Widget.
-
     return Center(
       child: ElevatedButton(
         onPressed: () {
@@ -193,6 +195,8 @@ class Page extends StatelessWidget {
 ```
 
 By default, the screen will be locked on start. If you want to change this behavior, you can set the `lockOnStart` in the `controller` to `false`, so the page will be unlocked on start.
+
+The `biometricAuthentication()` is just an example that shows you how to implement it into your `SecureGate`. You can try it in the example.
 
 ## Information
 

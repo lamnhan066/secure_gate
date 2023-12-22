@@ -1,3 +1,9 @@
+## 0.0.3
+
+* Add `onFocus` parameter to `SecureGate` and `SecureGateController` to control the focus event, so you can implement something like biometric authentication.
+* Improve internal behavior.
+* Update README.
+
 ## 0.0.2
 
 * Fixes: `SecureGate` does not respect the unlocked state.

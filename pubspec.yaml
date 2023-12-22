@@ -1,6 +1,6 @@
 name: secure_gate
 description: "A simple package that helps you secure your app when it is hidden or inactive by covered with a blur screen and overlays Widget."
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/lamnhan066/secure_gate
 
 environment:
