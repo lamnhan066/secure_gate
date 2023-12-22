@@ -1,5 +1,6 @@
-## 0.1.0
+## 0.1.1
 
+* Change min sdk version to `3.0.0`.
 * Change from `overlays` to `overlayBuilder`.
 * Update needed files.
 
