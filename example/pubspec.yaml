@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   secure_gate:
     path: ../
+  local_auth: ^2.1.7
 
 dev_dependencies:
   flutter_test:

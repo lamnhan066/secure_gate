@@ -1,3 +1,4 @@
+import 'package:example/biometric.dart';
 import 'package:example/global_default_overlays.dart';
 import 'package:example/global_overlays.dart';
 import 'package:example/local_overlays.dart';
@@ -44,6 +45,11 @@ class _MyAppState extends State<MyApp> {
         return SecureGate(
           controller: _controller,
           child: child!,
+          onFocus: (controller) async {
+            if (await isBiometricAuthenticated()) {
+              controller.unlock();
+            }
+          },
           overlays: (context, controller) {
             return Center(
               child: ElevatedButton(
