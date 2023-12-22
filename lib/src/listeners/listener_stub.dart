@@ -6,7 +6,7 @@ import 'package:secure_gate/src/listeners/listener.dart';
 class SecureGateListenerImplement
     with WidgetsBindingObserver
     implements SecureGateListener {
-  final StreamController _controller = StreamController.broadcast();
+  final StreamController _controller = StreamController();
 
   SecureGateListenerImplement();
 
@@ -18,6 +18,7 @@ class SecureGateListenerImplement
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _controller.close();
   }
 
   @override
