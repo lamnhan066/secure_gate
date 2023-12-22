@@ -1,9 +1,31 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+
 class SecureGateController {
-  static SecureGateController instance = SecureGateController();
+  /// Build-in instance for [SecureGateController]
+  static SecureGateController? _instance;
+  static SecureGateController get instance {
+    // If there is a valid instance.
+    if (_instance != null && !_instance!._streamController.isClosed) {
+      return _instance!;
+    }
+
+    // If there is a valid instance but the `_streamController` is closed.
+    if (_instance != null && _instance!._streamController.isClosed) {
+      _instance = SecureGateController(
+        lockOnStart: _instance!._lockOnStart,
+        overlays: _instance!.overlays,
+      );
+      return _instance!;
+    }
+
+    _instance = SecureGateController();
+    return _instance!;
+  }
 
   bool _lock = true;
+  final bool _lockOnStart;
 
   /// `true` if the screen is locked, otherwise is `false`.
   bool get isLocked => _lock;
@@ -26,41 +48,73 @@ class SecureGateController {
   final StreamController<bool> _streamController = StreamController.broadcast();
   Stream<bool> get stream => _streamController.stream;
 
-  /// Create a new instance for the controller.
+  Widget Function(BuildContext context, SecureGateController controller)?
+      overlays;
+
+  /// Create a new instance for the controller. The SecureGate will automatically
+  /// locked when it starts if [lockOnStart] is `true`.
   ///
-  /// You can use `SecureGateController.instance` to get the singleton instance
+  /// You can use the same overlays across pages by setting the [overlays] Widget.
+  /// If you set the `overlays` parameter in both SecureGateController and SecureGate,
+  /// the SecureGate one will be used.
+  ///
+  /// You can use [SecureGateController.instance] to get the singleton instance
   /// of the controller.
-  SecureGateController();
+  SecureGateController({
+    bool lockOnStart = true,
+    this.overlays,
+  }) : _lockOnStart = lockOnStart {
+    _lock = lockOnStart;
+  }
+
+  /// Dispose this controller. You should call this when there is no `SecureGate`
+  /// is needed to use.
+  void dispose() {
+    _streamController.close();
+  }
 
   /// Lock the screen.
   ///
   /// This will do nothing if the `SecureGateController` [isOff].
   void lock() {
-    if (!_on) return;
-
-    _lock = true;
-    _streamController.sink.add(true);
+    _setLock(true);
   }
 
   /// Unlock the screen.
   ///
   /// This will do nothing if the `SecureGateController` [isOff].
   void unlock() {
+    _setLock(false);
+  }
+
+  void _setLock(bool isLock) {
     if (!_on) return;
 
-    _lock = false;
-    _streamController.sink.add(false);
+    if (isLock) {
+      _lock = true;
+      _streamController.sink.add(true);
+    } else {
+      _lock = false;
+      _streamController.sink.add(false);
+    }
   }
 
-  /// Turn on the securer.
-  void on() {
+  /// Turn on the controller.
+  ///
+  /// If [isLock] is `true`, the screen will be locked after turning on.
+  void on({bool isLock = true}) {
     _on = true;
-    lock();
+
+    if (isLock) lock();
   }
 
-  /// Turn off the securer.
-  void off() {
-    unlock();
+  /// Turn off the controller. You cannot `lock()` and `unlock()` when the controller
+  /// is turned off.
+  ///
+  /// If [isUnlock] is `true`, the screen will be unlocked before turning off.
+  void off({bool isUnlock = true}) {
+    if (isUnlock) unlock();
+
     _on = false;
   }
 

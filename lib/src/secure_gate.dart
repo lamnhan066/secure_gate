@@ -12,7 +12,8 @@ class SecureGate extends StatefulWidget {
   /// or inside the [overlays] parameter.
   ///
   /// You can use [overlays] to put any [Widget] above the blur screen or you
-  /// can put the biometric authentication inside it.
+  /// can put the biometric authentication inside it. If you set the `overlays`
+  /// parameter in both SecureGateController and SecureGate, the SecureGate one will be used.
   const SecureGate({
     super.key,
     this.controller,
@@ -32,7 +33,9 @@ class SecureGate extends StatefulWidget {
   final Widget child;
 
   /// Put an overlay widget. You can use the [controller] to `lock` or `unlock`
-  /// the screen.
+  /// the screen. You can set the global `overlays` in SecureGateController so
+  /// it can be used across pages. If you set the `overlays` parameter in both
+  /// [SecureGateController] and [SecureGate], the [SecureGate] one will be used.
   final Widget Function(BuildContext context, SecureGateController controller)?
       overlays;
 
@@ -63,7 +66,6 @@ class _SecureGateState extends State<SecureGate>
   void initState() {
     _color = widget.color ?? Colors.grey.shade200;
     _controller = widget.controller ?? SecureGateController.instance;
-    _controller.lock();
 
     _secureGateListener.init();
     _secureGateSub = _secureGateListener.stream.listen((event) {
@@ -74,9 +76,7 @@ class _SecureGateState extends State<SecureGate>
 
     _gateVisibility =
         AnimationController(vsync: this, duration: kThemeAnimationDuration * 2)
-          ..addListener(() {
-            setState(() {});
-          });
+          ..addListener(_updateState);
     _sub = _controller.stream.listen(_callback);
 
     _callback(_controller.isLocked);
@@ -98,6 +98,10 @@ class _SecureGateState extends State<SecureGate>
     } else {
       _gateVisibility.animateBack(0).orCancel;
     }
+  }
+
+  void _updateState() {
+    setState(() {});
   }
 
   @override
@@ -122,11 +126,13 @@ class _SecureGateState extends State<SecureGate>
                 ),
               ),
             ),
-            if (widget.overlays != null)
+            if (widget.overlays != null || _controller.overlays != null)
               Overlay(
                 initialEntries: [
                   OverlayEntry(
-                    builder: (_) => widget.overlays!(context, _controller),
+                    builder: (context) => widget.overlays != null
+                        ? widget.overlays!(context, _controller)
+                        : _controller.overlays!(context, _controller),
                   ),
                 ],
               ),
