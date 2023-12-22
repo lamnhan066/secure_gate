@@ -15,7 +15,7 @@ class SecureGateController {
     if (_instance != null && _instance!._streamController.isClosed) {
       _instance = SecureGateController(
         lockOnStart: _instance!._lockOnStart,
-        overlays: _instance!.overlays,
+        overlayBuilder: _instance!.overlayBuilder,
       );
       return _instance!;
     }
@@ -50,28 +50,28 @@ class SecureGateController {
 
   /// A global overlay widget, this is a default overlay for all `SecureGate`
   /// that use the same `controller`. You can use the `controller` to `lock` or `unlock`
-  /// the screen.  If you set the `overlays` parameter in both [SecureGateController]
+  /// the screen.  If you set the `overlayBuilder` parameter in both [SecureGateController]
   /// and `SecureGate`, the `SecureGate` one will be used.
   Widget Function(BuildContext context, SecureGateController controller)?
-      overlays;
+      overlayBuilder;
 
   /// This is a global callback that will be called when the device is focused. You can
-  /// use something like biometric authentication here. If you set the `overlays` parameter
+  /// use something like biometric authentication here. If you set the `overlayBuilder` parameter
   /// in both [SecureGateController] and `SecureGate`, the `SecureGate` one will be used.
   final FutureOr<void> Function(SecureGateController controller)? onFocus;
 
   /// Create a new instance for the controller. The SecureGate will automatically
   /// locked when it starts if [lockOnStart] is `true`.
   ///
-  /// You can use the same overlays across pages by setting the [overlays] Widget.
-  /// If you set the `overlays` parameter in both SecureGateController and SecureGate,
+  /// You can use the same overlayBuilder across pages by setting the [overlayBuilder] Widget.
+  /// If you set the `overlayBuilder` parameter in both SecureGateController and SecureGate,
   /// the SecureGate one will be used.
   ///
   /// You can use [SecureGateController.instance] to get the singleton instance
   /// of the controller.
   SecureGateController({
     bool lockOnStart = true,
-    this.overlays,
+    this.overlayBuilder,
     this.onFocus,
   }) : _lockOnStart = lockOnStart {
     _lock = lockOnStart;

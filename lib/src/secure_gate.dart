@@ -10,17 +10,17 @@ import 'secure_gate_controller.dart';
 class SecureGate extends StatefulWidget {
   /// [SecureGate] use a build-in singleton controller to control the state if
   /// you not specify the [controller]. You can get this by using [SecureGateController.instance]
-  /// or inside the [overlays] parameter.
+  /// or inside the [overlayBuilder] parameter.
   ///
-  /// You can use [overlays] to put any [Widget] above the blur screen or you
-  /// can put the biometric authentication inside it. If you set the `overlays`
+  /// You can use [overlayBuilder] to put any [Widget] above the blur screen or you
+  /// can put the biometric authentication inside it. If you set the `overlayBuilder`
   /// parameter in both SecureGateController and SecureGate, the SecureGate one will be used.
   const SecureGate({
     super.key,
     this.controller,
     required this.child,
     this.onFocus,
-    this.overlays,
+    this.overlayBuilder,
     this.color,
     this.blur = 15,
     this.opacity = 0.6,
@@ -35,15 +35,15 @@ class SecureGate extends StatefulWidget {
   final Widget child;
 
   /// Put an overlay widget. You can use the [controller] to `lock` or `unlock`
-  /// the screen. You can set the global `overlays` in `SecureGateController` so
-  /// it can be used across pages. If you set the `overlays` parameter in both
+  /// the screen. You can set the global `overlayBuilder` in `SecureGateController` so
+  /// it can be used across pages. If you set the `overlayBuilder` parameter in both
   /// [SecureGateController] and [SecureGate], the [SecureGate] one will be used.
   final Widget Function(BuildContext context, SecureGateController controller)?
-      overlays;
+      overlayBuilder;
 
   /// This is a callback that will be called when the device is focused. You can
   /// use something like biometric authentication here. You can set the global `onFocus`
-  /// in `SecureGateController` so it can be used across pages. If you set the `overlays` parameter
+  /// in `SecureGateController` so it can be used across pages. If you set the `overlayBuilder` parameter
   /// in both [SecureGateController] and [SecureGate], the [SecureGate] one will be used.
   final FutureOr<void> Function(SecureGateController controller)? onFocus;
 
@@ -151,7 +151,7 @@ class _SecureGateState extends State<SecureGate>
       child: Stack(
         children: [
           widget.child,
-          if (_gateVisibility.value != 0) ...[
+          if (_gateVisibility.value != 0)
             Positioned.fill(
               child: BackdropFilter(
                 filter: ImageFilter.blur(
@@ -164,20 +164,18 @@ class _SecureGateState extends State<SecureGate>
                       widget.opacity * _gateVisibility.value,
                     ),
                   ),
+                  child: Overlay(
+                    initialEntries: [
+                      OverlayEntry(
+                        builder: (context) => widget.overlayBuilder != null
+                            ? widget.overlayBuilder!(context, _controller)
+                            : _controller.overlayBuilder!(context, _controller),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            if (widget.overlays != null || _controller.overlays != null)
-              Overlay(
-                initialEntries: [
-                  OverlayEntry(
-                    builder: (context) => widget.overlays != null
-                        ? widget.overlays!(context, _controller)
-                        : _controller.overlays!(context, _controller),
-                  ),
-                ],
-              ),
-          ],
         ],
       ),
     );
