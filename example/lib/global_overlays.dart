@@ -3,7 +3,7 @@ import 'package:secure_gate/secure_gate.dart';
 
 class GlobalOverlays extends StatelessWidget {
   static final secureGateController = SecureGateController(
-    overlays: (context, controller) {
+    overlayBuilder: (context, controller) {
       return Center(
         child: ElevatedButton(
           onPressed: () {

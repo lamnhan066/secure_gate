@@ -11,8 +11,8 @@ class GlobalDefaultOvelays extends StatefulWidget {
 class _GlobalDefaultOvelaysState extends State<GlobalDefaultOvelays> {
   @override
   void initState() {
-    // Set the global overlays
-    SecureGateController.instance.overlays = (context, controller) {
+    // Set the global overlayBuilder
+    SecureGateController.instance.overlayBuilder = (context, controller) {
       return Center(
         child: ElevatedButton(
           onPressed: () {

@@ -50,7 +50,7 @@ class _MyAppState extends State<MyApp> {
               controller.unlock();
             }
           },
-          overlays: (context, controller) {
+          overlayBuilder: (context, controller) {
             return Center(
               child: ElevatedButton(
                 onPressed: () {

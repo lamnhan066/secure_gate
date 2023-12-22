@@ -25,7 +25,7 @@ class _LocalOverlaysState extends State<LocalOverlays> {
         title: const Text('Local Overlays'),
       ),
       body: SecureGate(
-        overlays: (context, controller) {
+        overlayBuilder: (context, controller) {
           return Center(
             child: ElevatedButton(
               onPressed: () {
@@ -72,7 +72,7 @@ class Page2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SecureGate(
-      overlays: (context, controller) {
+      overlayBuilder: (context, controller) {
         return Center(
           child: ElevatedButton(
             onPressed: () {
