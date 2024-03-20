@@ -1,3 +1,8 @@
+## 0.2.0
+
+* Add `context` to `onFocus`.
+* Add logic to check the overlayBuilder better.
+
 ## 0.1.1
 
 * Change min sdk version to `3.0.0`.

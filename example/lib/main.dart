@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
         return SecureGate(
           controller: _controller,
           child: child!,
-          onFocus: (controller) async {
+          onFocus: (context, controller) async {
             if (await isBiometricAuthenticated()) {
               controller.unlock();
             }

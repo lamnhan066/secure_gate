@@ -13,7 +13,7 @@ class Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SecureGate(
-        onFocus: (controller) async {
+        onFocus: (context, controller) async {
           if (await biometricAuthentication()) {
             controller.unlock();
           }
@@ -53,7 +53,7 @@ class MyApp extends StatelessWidget {
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
       builder: (context, child) {
         return SecureGate(
-          onFocus: (controller) async {
+          onFocus: (context, controller) async {
             if (await biometricAuthentication()) {
               controller.unlock();
             }
@@ -91,7 +91,7 @@ class MyApp extends StatelessWidget {
         themeMode: ThemeMode.light,
         builder: (BuildContext context, Widget? child) {
         return SecureGate(
-            onFocus: (controller) async {
+            onFocus: (context, controller) async {
               if (await biometricAuthentication()) {
                 controller.unlock();
               }
@@ -157,7 +157,7 @@ Or you can create a global overlayBuilder by setting the `overlayBuilder` parame
 
 ```dart
 final secureGateController = SecureGateController(
-  onFocus: (controller) async {
+  onFocus: (context, controller) async {
     if (await biometricAuthentication()) {
       controller.unlock();
     }
