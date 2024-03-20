@@ -45,7 +45,8 @@ class SecureGate extends StatefulWidget {
   /// use something like biometric authentication here. You can set the global `onFocus`
   /// in `SecureGateController` so it can be used across pages. If you set the `overlayBuilder` parameter
   /// in both [SecureGateController] and [SecureGate], the [SecureGate] one will be used.
-  final FutureOr<void> Function(SecureGateController controller)? onFocus;
+  final FutureOr<void> Function(
+      BuildContext context, SecureGateController controller)? onFocus;
 
   /// Blur of the blur screen.
   final double blur;
@@ -66,7 +67,8 @@ class _SecureGateState extends State<SecureGate>
   late StreamSubscription<bool> _sub;
   late SecureGateController _controller;
   late Color _color;
-  FutureOr<void> Function(SecureGateController controller)? _onFocus;
+  FutureOr<void> Function(
+      BuildContext context, SecureGateController controller)? _onFocus;
 
   final _secureGateListener = SecureGateListener();
   late StreamSubscription _secureGateSub;
@@ -126,7 +128,7 @@ class _SecureGateState extends State<SecureGate>
   Future<void> _onFocusCallback() async {
     Completer completer = Completer();
     if (_onFocus != null) {
-      completer.complete(_onFocus!(_controller));
+      completer.complete(_onFocus!(context, _controller));
     } else {
       completer.complete();
     }
@@ -164,15 +166,20 @@ class _SecureGateState extends State<SecureGate>
                       widget.opacity * _gateVisibility.value,
                     ),
                   ),
-                  child: Overlay(
-                    initialEntries: [
-                      OverlayEntry(
-                        builder: (context) => widget.overlayBuilder != null
-                            ? widget.overlayBuilder!(context, _controller)
-                            : _controller.overlayBuilder!(context, _controller),
-                      ),
-                    ],
-                  ),
+                  child: widget.overlayBuilder != null ||
+                          _controller.overlayBuilder != null
+                      ? Overlay(
+                          initialEntries: [
+                            OverlayEntry(
+                              builder: (context) => widget.overlayBuilder !=
+                                      null
+                                  ? widget.overlayBuilder!(context, _controller)
+                                  : _controller.overlayBuilder!(
+                                      context, _controller),
+                            ),
+                          ],
+                        )
+                      : null,
                 ),
               ),
             ),

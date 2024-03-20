@@ -58,7 +58,8 @@ class SecureGateController {
   /// This is a global callback that will be called when the device is focused. You can
   /// use something like biometric authentication here. If you set the `overlayBuilder` parameter
   /// in both [SecureGateController] and `SecureGate`, the `SecureGate` one will be used.
-  final FutureOr<void> Function(SecureGateController controller)? onFocus;
+  final FutureOr<void> Function(
+      BuildContext context, SecureGateController controller)? onFocus;
 
   /// Create a new instance for the controller. The SecureGate will automatically
   /// locked when it starts if [lockOnStart] is `true`.
